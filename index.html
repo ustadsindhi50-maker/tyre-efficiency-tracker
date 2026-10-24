@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#071a35">
+<title>Tyre Efficiency Tracker</title>
+<style>
+:root{--navy:#071a35;--blue:#0878f9;--cyan:#15c5ed;--green:#19c878;--bg:#f3f6fb;--ink:#17253a;--muted:#66758b;--line:#dce4ef;--gold:#fff1c7}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--ink)}
+header{background:linear-gradient(135deg,#071a35,#0b3972);color:#fff;padding:22px 18px 25px;border-radius:0 0 25px 25px}
+.brand{display:flex;align-items:center;gap:12px;max-width:760px;margin:auto}.logo{width:54px;height:54px;border-radius:15px;background:#06132a;border:2px solid #0878f9;display:grid;place-items:center;flex-shrink:0}.logo svg{width:42px;height:42px}
+h1{font-size:20px;margin:0;line-height:1.2}header p{margin:5px 0 0;color:#d5e7ff;font-size:13px}
+main{max-width:760px;margin:0 auto;padding:16px 13px 40px}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}.tab{border:1px solid var(--line);border-radius:13px;padding:12px 8px;background:#fff;color:var(--ink);font-weight:750;font-size:14px}.tab.active{background:var(--blue);border-color:var(--blue);color:white}
+.card{background:#fff;border:1px solid var(--line);border-radius:17px;padding:15px;margin-bottom:13px;box-shadow:0 3px 14px #18365b08}
+.summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.metric{background:#f1f7ff;border-radius:13px;padding:12px}.metric span{display:block;color:var(--muted);font-size:12px}.metric strong{display:block;font-size:25px;color:#0a4b9a;margin-top:3px}
+label{display:block;font-size:13px;font-weight:750;margin-bottom:7px}.entry{display:grid;grid-template-columns:1fr 1fr;gap:10px}.field{min-width:0}input,select{width:100%;border:1px solid #cbd7e6;border-radius:11px;padding:12px;font:inherit;font-size:16px;background:#fff;color:var(--ink)}.hint{font-size:12px;color:var(--muted);margin:7px 0 0}
+button{font:inherit;cursor:pointer}.primary{border:0;background:var(--blue);color:white;font-weight:800;border-radius:11px;padding:13px 15px;width:100%;margin-top:12px}.secondary{border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 11px;font-weight:700;color:var(--ink)}.danger{color:#b42318;border-color:#f1c7c4}
+.sectionhead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}.sectionhead h2{font-size:16px;margin:0}.tablewrap{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:13px;min-width:310px}th,td{border-bottom:1px solid #e8edf4;padding:10px 7px;text-align:center}th{background:#f4f7fb;color:#46576d;font-size:12px}td input{padding:8px 5px;text-align:center;min-width:70px;background:var(--gold);border-color:#f1d78c}.totalrow{font-weight:800;background:#e9f8ee}.empty{color:var(--muted);text-align:center;padding:22px 8px}.status{font-size:12px;color:var(--muted);text-align:center;margin-top:8px}.note{font-size:12px;line-height:1.5;color:var(--muted)}.actions{display:flex;gap:8px;flex-wrap:wrap}.actions button{flex:1}
+@media(min-width:600px){main{padding-top:22px}.card{padding:18px}.metric strong{font-size:29px}}
+</style>
+</head>
+<body>
+<header><div class="brand">
+<div class="logo" aria-hidden="true"><svg viewBox="0 0 100 100" fill="none"><circle cx="34" cy="39" r="26" stroke="white" stroke-width="9"/><circle cx="34" cy="39" r="12" stroke="white" stroke-width="5"/><path d="M67 70V53h10v17M81 70V42h10v28" stroke="#15c5ed" stroke-width="7" stroke-linecap="round"/><path d="M58 51Q72 40 84 23M72 23h12v12" stroke="#19c878" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+<div><h1>Tyre Efficiency Tracker</h1><p>Daily extra tyres · Automatic totals · Saved on this device</p></div>
+</div></header>
+<main>
+<div class="tabs" role="tablist">
+<button class="tab active" id="tabPayroll" onclick="setMode('payroll')">15 → 15 Cycle</button>
+<button class="tab" id="tabMonth" onclick="setMode('month')">Day 1 → 30</button>
+</div>
+<div class="card summary">
+<div class="metric"><span>Total extra tyres</span><strong id="total">0</strong></div>
+<div class="metric"><span>Days entered</span><strong id="days">0 / 31</strong></div>
+</div>
+<div class="card">
+<div class="sectionhead"><h2>Add daily entry</h2></div>
+<div class="entry">
+<div class="field"><label for="date">Date / day</label><select id="date"></select></div>
+<div class="field"><label for="qty">Extra tyres above 100</label><input id="qty" type="number" min="0" max="300" step="1" inputmode="numeric" placeholder="e.g. 20"></div>
+</div>
+<p class="hint">Example: 120 tyres made = enter 20. If exactly 100, enter 0.</p>
+<button class="primary" onclick="saveEntry()">Save daily tyres</button>
+<div class="status" id="status" aria-live="polite">Entries save in this browser on this device.</div>
+</div>
+<div class="card">
+<div class="sectionhead"><h2>Daily record</h2><button class="secondary" onclick="exportCSV()">Export CSV</button></div>
+<div class="tablewrap"><table><thead><tr><th>Date / day</th><th>Extra tyres</th><th>Running total</th><th>Action</th></tr></thead><tbody id="rows"></tbody><tfoot><tr class="totalrow"><td>TOTAL</td><td id="footTotal">0</td><td id="footRunning">0</td><td>—</td></tr></tfoot></table></div>
+<p class="note">Tap a number in the Extra tyres column to edit it. Use the trash button to clear one day. Switching between tabs shows separate records.</p>
+</div>
+<div class="card">
+<div class="sectionhead"><h2>Data backup</h2></div>
+<div class="actions"><button class="secondary" onclick="backup()">Download backup</button><button class="secondary danger" onclick="clearCycle()">Clear this record</button></div>
+<p class="note">Important: browser data can be lost if you clear browser storage or change phones. Download a backup regularly. This file does not send your data to anyone.</p>
+</div>
+<div class="card">
+<strong>How to add this to your home screen</strong>
+<p class="note">Open this app page in Chrome, then tap ⋮ → “Add to Home screen” if your browser offers it. A downloaded HTML file may open as a local page and may not install as a full app. For a reliable installable app icon, this page must be hosted on an HTTPS website.</p>
+</div>
+</main>
+<script>
+const keys={payroll:'tyreTracker_payroll_v1',month:'tyreTracker_month_v1'};
+let mode='payroll';
+function labels(){return mode==='payroll'?['15 (Start)',...Array.from({length:15},(_,i)=>String(i+16)),...Array.from({length:15},(_,i)=>String(i+1)+' (next month)')]:Array.from({length:30},(_,i)=>String(i+1));}
+function read(){try{return JSON.parse(localStorage.getItem(keys[mode])||'{}')}catch(e){return {}}}
+function write(data){localStorage.setItem(keys[mode],JSON.stringify(data))}
+function setMode(m){mode=m;document.getElementById('tabPayroll').classList.toggle('active',m==='payroll');document.getElementById('tabMonth').classList.toggle('active',m==='month');render()}
+function render(){const ls=labels(),data=read(),sel=document.getElementById('date'),old=sel.value;sel.innerHTML='';ls.forEach((v,i)=>{let o=document.createElement('option');o.value=String(i);o.textContent=v;sel.appendChild(o)});if(old!==''&&Number(old)<ls.length)sel.value=old;const tbody=document.getElementById('rows');tbody.innerHTML='';let sum=0,count=0;
+ls.forEach((label,i)=>{const val=data[i];if(val!==undefined&&val!==null&&val!==''){sum+=Number(val)||0;count++}const tr=document.createElement('tr');const td1=document.createElement('td');td1.textContent=label;const td2=document.createElement('td');const inp=document.createElement('input');inp.type='number';inp.min='0';inp.max='300';inp.step='1';inp.inputMode='numeric';inp.value=val??'';inp.setAttribute('aria-label','Extra tyres for '+label);inp.addEventListener('change',()=>{let n=inp.value.trim();if(n==='' ){delete data[i]}else if(Number.isInteger(Number(n))&&Number(n)>=0&&Number(n)<=300){data[i]=Number(n)}else{alert('Enter a whole number from 0 to 300.');render();return}write(data);render()});td2.appendChild(inp);const td3=document.createElement('td');td3.textContent='';const td4=document.createElement('td');const del=document.createElement('button');del.className='secondary danger';del.textContent='×';del.title='Clear this day';del.onclick=()=>{delete data[i];write(data);render()};td4.appendChild(del);tr.append(td1,td2,td3,td4);tbody.appendChild(tr);tr.dataset.idx=i;tr.dataset.val=val??'';});
+let running=0;Array.from(tbody.children).forEach(tr=>{const v=tr.dataset.val;if(v!=='')running+=Number(v)||0;tr.children[2].textContent=running});document.getElementById('total').textContent=sum;document.getElementById('days').textContent=count+' / '+ls.length;document.getElementById('footTotal').textContent=sum;document.getElementById('footRunning').textContent=sum;}
+function saveEntry(){const i=Number(document.getElementById('date').value),raw=document.getElementById('qty').value;if(raw===''||!Number.isInteger(Number(raw))||Number(raw)<0||Number(raw)>300){document.getElementById('status').textContent='Please enter a whole number from 0 to 300.';return}const d=read();d[i]=Number(raw);write(d);document.getElementById('qty').value='';document.getElementById('status').textContent='Saved: '+labels()[i]+' = '+raw+' extra tyres.';render()}
+function download(name,text,type){const blob=new Blob([text],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+function exportCSV(){const ls=labels(),d=read();let total=0,rows=[['Date / day','Extra tyres','Running total']];ls.forEach((l,i)=>{let v=d[i]===undefined?'':d[i];if(v!=='')total+=Number(v);rows.push([l,v,total])});rows.push(['TOTAL',total,total]);download('tyre-efficiency-'+mode+'.csv',rows.map(r=>r.map(v=>'"'+String(v).replaceAll('"','""')+'"').join(',')).join('\n'),'text/csv;charset=utf-8')}
+function backup(){download('tyre-efficiency-backup.json',JSON.stringify({payroll:JSON.parse(localStorage.getItem(keys.payroll)||'{}'),month:JSON.parse(localStorage.getItem(keys.month)||'{}')},null,2),'application/json')}
+function clearCycle(){if(confirm('Clear all entries in this selected record? Download a backup first if needed.')){localStorage.removeItem(keys[mode]);render();document.getElementById('status').textContent='This record has been cleared.'}}
+render();
+</script>
+</body>
+</html>
